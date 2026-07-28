@@ -5,7 +5,7 @@ const Button = ({onClick, text}) => {
 		<button onClick={onClick}> {text} </button>
 	)
 }
-
+const StatisticLine = ({text, value}) => <p> {text} {value} </p>
 const Statistics = (props) => {
 	const goodNum = props.good
 	const neutralNum = props.neutral
@@ -18,14 +18,14 @@ const Statistics = (props) => {
 		)
 	}
 	return (
-		<>
-			<p> good  {goodNum} </p>
-			<p> neutral  {neutralNum} </p>
-			<p> bad  {badNum} </p>
-			<p> all {totalNum} </p>
-			<p> average {totalNum != 0 ? totalScore / totalNum : 0} </p>
-			<p> positive {totalNum != 0 ? goodNum / totalNum * 100 : 0} % </p>
-		</>
+		<div>
+			<StatisticLine text='good' value={goodNum} />
+			<StatisticLine text='neutral' value={neutralNum} />
+			<StatisticLine text='bad' value={badNum} />
+			<StatisticLine text='all' value={totalNum} />
+			<StatisticLine text='average' value={totalScore / totalNum} />
+			<StatisticLine text='positive' value={goodNum / totalNum * 100 + '%'} />
+		</div>
 	)
 }
 
