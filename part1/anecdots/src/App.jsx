@@ -17,15 +17,23 @@ const App = () => {
   ]
    
   const [selected, setSelected] = useState(0)
-	const func = () => {
+	const [votes, setVotes] = useState(new Array(anecdotes.length).fill(0))
+	const setSelectedFunc = () => {
 		const n = anecdotes.length
 		const randomNum = Math.floor(Math.random() * n) // 生成0 - n-1的整数
 		setSelected(randomNum)
 	}
+	const setVotesFunc = () => {
+		const copy = [...votes]
+		copy[selected]++
+		setVotes(copy)
+	}
   return (
     <div>
       <p> {anecdotes[selected]} </p>
-			<Button onClick={func} text='next anecdote' />
+      <p> {'has ' + votes[selected] + ' votes'} </p>
+			<Button onClick={setVotesFunc} text='vote' />
+			<Button onClick={setSelectedFunc} text='next anecdote' />
     </div>
   )
 }
