@@ -15,7 +15,7 @@ const App = () => {
     'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.',
     'The only way to go fast, is to go well.'
   ]
-   
+  
   const [selected, setSelected] = useState(0)
 	const [votes, setVotes] = useState(new Array(anecdotes.length).fill(0))
 	const setSelectedFunc = () => {
@@ -28,12 +28,21 @@ const App = () => {
 		copy[selected]++
 		setVotes(copy)
 	}
+	let id = 0
+	for (let i = 0; i < anecdotes.length; ++i) {
+		if (votes[i] > votes[id]) {
+			id = i
+		}
+	}
   return (
     <div>
+			<h1> Anecdote of the day </h1>
       <p> {anecdotes[selected]} </p>
       <p> {'has ' + votes[selected] + ' votes'} </p>
 			<Button onClick={setVotesFunc} text='vote' />
 			<Button onClick={setSelectedFunc} text='next anecdote' />
+			<h1> Anecdote with most votes </h1>
+      <p> {anecdotes[id]} </p>
     </div>
   )
 }
