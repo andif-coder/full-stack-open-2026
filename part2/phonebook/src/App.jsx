@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 
 const Person = ({person}) => {
 	return (
@@ -37,15 +38,23 @@ const PersonForm = ({onSubmit, newName, onChangeName, newNum, onChangeNum}) => {
 	)
 }
 const App = () => {
-  const [persons, setPersons] = useState([
-		{ name: 'Arto Hellas', number: '110' },
-		{ name: 'Ada Lovelace', number: '111' },
-		{ name: 'Dan Abramov', number: '112' },
-		{ name: 'Mary Poppendieck', number: '112' },
-	]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNum, setNewNum] = useState('')
 	const [filter, setFilter] = useState('')
+	
+	useEffect(() => {
+		axios.get('http://localhost:3001/persons')
+			.then(persons => {
+				console.log('成功从服务器获取数据')
+				console.log(persons.data)
+				setPersons(persons.data)
+			})
+			.catch(error => {
+				console.log('从服务器获取数据失败, 报错:', error)
+			})
+	}, [])
+
 	const handleNewName = (event) => {
 		setNewName(event.target.value)
 	}
@@ -70,7 +79,6 @@ const App = () => {
 		setNewName('')
 		setNewNum('')
 	}
-
 	const personsToShow = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
 
   return (
