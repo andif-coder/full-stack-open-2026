@@ -92,15 +92,15 @@ const App = () => {
 				console.log(`新增${newPerson.name}失败，报错: ${error}`)
 			})
 	}
-	// const personsToShow = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+	const personsToShow = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
 	const delPerson = (person) => {
 		return () => {
 			if (window.confirm(`删除 ${person.name} ?`)) {
 				personServices
 					.remove(person)
-					.then(delperson => {
-						console.log(`删除${delperson.name}成功`)
-						setPersons(persons.filter(person => person.id !== delperson.id))
+					.then(() => {
+						console.log(`删除${person.name}成功`)
+						setPersons(persons.filter(p => p.id !== person.id))
 					})
 					.catch(error => {
 						console.log(`删除${person.name}失败，报错: ${error}`)
@@ -115,7 +115,7 @@ const App = () => {
 			<Filter filter={filter} onChange={handleFilter} />
 			<PersonForm onSubmit={addPerson} newName={newName} onChangeName={handleNewName} newNum={newNum} onChangeNum={handleNewNum} />
       <h2>Numbers</h2>
-			<Persons persons={persons} delFunc={delPerson}/>
+			<Persons persons={personsToShow} delFunc={delPerson}/>
     </div>
   )
 }

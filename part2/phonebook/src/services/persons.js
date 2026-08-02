@@ -8,6 +8,6 @@ const create = newPerson => {
 }
 const remove = delPerson => {
 	const delUrl = baseUrl + '/' + delPerson.id
-	return axios.delete(delUrl).then(response => response.data)
+	return axios.delete(delUrl)
 }
 export default {getAll, create, remove}
