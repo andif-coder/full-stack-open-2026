@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personServices from './services/persons'
 
-const Person = ({person}) => {
+const Remove = ({onClick}) => {
+	return <button onClick={onClick} > delete </button>
+}
+
+const Person = ({person, delFunc}) => {
 	return (
-		<p> {person.name} {person.number} </p>
+		<p> {person.name} {person.number} <Remove onClick={delFunc} /> </p>
 	)
 }
 
@@ -13,10 +17,10 @@ const Filter = ({filter, onChange}) => {
 	)
 }
 
-const Persons = ({persons}) => {
+const Persons = ({persons, delFunc}) => {
 	return (
 		<div> {
-			persons.map(person => <Person key={person.name} person={person} />)
+			persons.map(person => <Person key={person.id} person={person} delFunc={delFunc(person)} />)
 		} </div>
 	)
 }
@@ -44,11 +48,12 @@ const App = () => {
 	const [filter, setFilter] = useState('')
 	
 	useEffect(() => {
-		axios.get('http://localhost:3001/persons')
+		personServices
+			.getAll()
 			.then(persons => {
 				console.log('成功从服务器获取数据')
-				console.log(persons.data)
-				setPersons(persons.data)
+				console.log(persons)
+				setPersons(persons)
 			})
 			.catch(error => {
 				console.log('从服务器获取数据失败, 报错:', error)
@@ -75,11 +80,34 @@ const App = () => {
 			name: newName,
 			number: newNum
 		}
-		setPersons(persons.concat(newPerson))
-		setNewName('')
-		setNewNum('')
+		personServices
+			.create(newPerson)
+			.then(person => {
+				console.log(`新增${newPerson.name}成功，数据: ${person.name}`)
+				setPersons(persons.concat(person))
+				setNewName('')
+				setNewNum('')
+			})
+			.catch(error => {
+				console.log(`新增${newPerson.name}失败，报错: ${error}`)
+			})
 	}
-	const personsToShow = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+	// const personsToShow = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+	const delPerson = (person) => {
+		return () => {
+			if (window.confirm(`删除 ${person.name} ?`)) {
+				personServices
+					.remove(person)
+					.then(delperson => {
+						console.log(`删除${delperson.name}成功`)
+						setPersons(persons.filter(person => person.id !== delperson.id))
+					})
+					.catch(error => {
+						console.log(`删除${person.name}失败，报错: ${error}`)
+					})
+			}
+		}
+	}
 
   return (
     <div>
@@ -87,7 +115,7 @@ const App = () => {
 			<Filter filter={filter} onChange={handleFilter} />
 			<PersonForm onSubmit={addPerson} newName={newName} onChangeName={handleNewName} newNum={newNum} onChangeNum={handleNewNum} />
       <h2>Numbers</h2>
-			<Persons persons={personsToShow} />
+			<Persons persons={persons} delFunc={delPerson}/>
     </div>
   )
 }
