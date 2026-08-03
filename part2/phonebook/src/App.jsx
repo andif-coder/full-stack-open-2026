@@ -47,7 +47,10 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNum, setNewNum] = useState('')
 	const [filter, setFilter] = useState('')
-	const [msg, setMsg] = useState(null)
+	const [msgObj, setMsgObj] = useState({
+		type: 'success',
+		content: null
+	})
 	
 	useEffect(() => {
 		personServices
@@ -84,9 +87,13 @@ const App = () => {
 				personServices
 					.update(changedPerson)
 					.then(response => {
-						setMsg(`修改${response.name}对应号码成功`)
+						const newMsg = {
+							type: 'success',
+							content: '修改' + response.name + '对应号码成功'
+						}
+						setMsgObj(newMsg)
 						setTimeout(() => {
-							setMsg(null)
+							setMsgObj({type: 'success', content: null})
 						}, 3000)
 						console.log(`成功修改${response.name}电话号码为${response.number}`)
 						setPersons(persons.map(p => p.id !== response.id ? p : response))
@@ -95,6 +102,17 @@ const App = () => {
 					})
 					.catch(error => {
 						console.log(`修改${changedPerson.name}电话号码为${newNum}失败, 报错为：`, error)
+						const newMsg = {
+							type: 'error',
+							content: '修改' + changedPerson.name + '对应号码失败，该用户已经被删除'
+						}
+						setMsgObj(newMsg)
+						setTimeout(() => {
+							setMsgObj({type: 'success', content: null})
+						}, 3000)
+						setPersons(persons.filter(p => p.id !== changedPerson.id))
+						setNewName('')
+						setNewNum('')
 					})
 			}
 			return
@@ -107,9 +125,13 @@ const App = () => {
 			.create(newPerson)
 			.then(person => {
 				console.log(`新增${newPerson.name}成功，数据: ${person.name}`)
-				setMsg(`新增${newPerson.name}成功`)
+				const newMsg = {
+					type: 'success',
+					content: '新增' + newPerson.name + '成功'
+				}
+				setMsgObj(newMsg)
 				setTimeout(() => {
-					setMsg(null)
+					setMsgObj({type: 'success', content: null})
 				}, 3000)
 				setPersons(persons.concat(person))
 				setNewName('')
@@ -139,7 +161,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-			<Notification className='success' msg={msg} />
+			<Notification msg={msgObj} />
 			<Filter filter={filter} onChange={handleFilter} />
 			<PersonForm onSubmit={addPerson} newName={newName} onChangeName={handleNewName} newNum={newNum} onChangeNum={handleNewNum} />
       <h2>Numbers</h2>
