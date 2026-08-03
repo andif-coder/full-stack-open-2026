@@ -50,10 +50,10 @@ const App = () => {
 	useEffect(() => {
 		personServices
 			.getAll()
-			.then(persons => {
+			.then(allPersons => {
 				console.log('成功从服务器获取数据')
-				console.log(persons)
-				setPersons(persons)
+				console.log(allPersons)
+				setPersons(allPersons)
 			})
 			.catch(error => {
 				console.log('从服务器获取数据失败, 报错:', error)
@@ -73,7 +73,24 @@ const App = () => {
 		event.preventDefault()
 		const exist = persons.some(person => person.name === newName)
 		if (exist) {
-			alert(`${newName} is already added to phonebook`)
+			if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+				const oldPerson = persons.find(person => person.name === newName)
+				const changedPerson = {
+					...oldPerson,
+					number: newNum
+				}
+				personServices
+					.update(changedPerson)
+					.then(response => {
+						console.log(`成功修改${response.name}电话号码为${response.number}`)
+						setPersons(persons.map(p => p.id !== response.id ? p : response))
+						setNewName('')
+						setNewNum('')
+					})
+					.catch(error => {
+						console.log(`修改${changedPerson.name}电话号码为${newNum}失败, 报错为：`, error)
+					})
+			}
 			return
 		}
 		const newPerson = {

@@ -10,4 +10,8 @@ const remove = delPerson => {
 	const delUrl = baseUrl + '/' + delPerson.id
 	return axios.delete(delUrl)
 }
-export default {getAll, create, remove}
+const update = changedPerson => {
+	const changedUrl = baseUrl + '/' + changedPerson.id
+	return axios.put(changedUrl, changedPerson).then(response => response.data)
+}
+export default {getAll, create, remove, update}
