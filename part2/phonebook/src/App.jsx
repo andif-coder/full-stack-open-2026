@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import personServices from './services/persons'
+import Notification from './components/Notification'
 
 const Remove = ({onClick}) => {
 	return <button onClick={onClick} > delete </button>
@@ -46,6 +47,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNum, setNewNum] = useState('')
 	const [filter, setFilter] = useState('')
+	const [msg, setMsg] = useState(null)
 	
 	useEffect(() => {
 		personServices
@@ -82,6 +84,10 @@ const App = () => {
 				personServices
 					.update(changedPerson)
 					.then(response => {
+						setMsg(`修改${response.name}对应号码成功`)
+						setTimeout(() => {
+							setMsg(null)
+						}, 3000)
 						console.log(`成功修改${response.name}电话号码为${response.number}`)
 						setPersons(persons.map(p => p.id !== response.id ? p : response))
 						setNewName('')
@@ -101,6 +107,10 @@ const App = () => {
 			.create(newPerson)
 			.then(person => {
 				console.log(`新增${newPerson.name}成功，数据: ${person.name}`)
+				setMsg(`新增${newPerson.name}成功`)
+				setTimeout(() => {
+					setMsg(null)
+				}, 3000)
 				setPersons(persons.concat(person))
 				setNewName('')
 				setNewNum('')
@@ -129,6 +139,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+			<Notification className='success' msg={msg} />
 			<Filter filter={filter} onChange={handleFilter} />
 			<PersonForm onSubmit={addPerson} newName={newName} onChangeName={handleNewName} newNum={newNum} onChangeNum={handleNewNum} />
       <h2>Numbers</h2>
