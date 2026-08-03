@@ -15,19 +15,19 @@ const Country = ({country}) => {
 			<p>{country.area}</p>
 			<h1>Languages</h1>
 			<ul>
-				{Object.values(country.languages).map(c => <li key={c}>{c}</li>)}
+				{Object.values(country.languages || {}).map(c => <li key={c.cca2}>{c}</li>)}
 			</ul>
 			<img src={country.flags.png} alt='国旗' width='150' />
 		</div>
 	)
 }
-const ShowCountries = ({countriesToShow}) => {
+const ShowCountries = ({countriesToShow, elseShowCountryFunc}) => {
 	if (countriesToShow.length > 10) {
 		return <div><p>Too many matches, specify another filter</p></div>
 	} else if (countriesToShow.length > 1) {
 		return (
 			<div>
-				{countriesToShow.map(c => <p key={c.cca2}>{c.name.common}</p>)}
+				{countriesToShow.map(c => <p key={c.cca2}>{c.name.common} <button onClick={elseShowCountryFunc(c)}>show</button></p>)}
 			</div>
 		)
 	} else if (countriesToShow.length === 1) {
@@ -41,9 +41,16 @@ const ShowCountries = ({countriesToShow}) => {
 const App = () => {
 	const [filter, setFilter] = useState('')
 	const [allCountriesInfo, setAllCountriesInfo] = useState([])
+	const [elseShowCountry, setElseShowCountry] = useState([])
+	const elseShowCountryFunc = (country) => {
+		return () => {
+			setElseShowCountry([].concat(country))
+		}
+	}
 	const handleFilter = (event) => {
 		console.log(event.target.value)
 		setFilter(event.target.value)
+		setElseShowCountry([])
 	}
 	useEffect(() => {
 		countriesServices
@@ -59,10 +66,11 @@ const App = () => {
 	console.log('获取所有国家的数据成功，数据：', allCountriesInfo)
 	const countriesToShow = filter.trim() === '' ? [] : allCountriesInfo.filter(r => r.name.common.toLowerCase().includes(filter.toLowerCase()))
 	console.log('过滤后的国家是: ', countriesToShow)
+	console.log('filter: ', filter)
   return (
 		<div>
 			<Filter filter={filter} onChange={handleFilter} />
-			<ShowCountries countriesToShow={countriesToShow} />
+			<ShowCountries countriesToShow={elseShowCountry.length ? elseShowCountry : countriesToShow} elseShowCountryFunc={elseShowCountryFunc} />
 		</div>
   )
 }
