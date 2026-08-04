@@ -1,8 +1,11 @@
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
-app.use(morgan('tiny'))
+morgan.token('body', (req) => {
+	return JSON.stringify(req.body)
+})
 app.use(express.json())
+app.use(morgan(':method :url :status :response-time ms :body'))
 let persons = [
 	{ 
 	  "id": "1",
@@ -50,7 +53,7 @@ app.delete('/api/persons/:id', (request, response) => {
 	persons = persons.filter(p => p.id !== id)
 	response.status(204).end()
 })
-const gerenateId = () => {
+const generateId = () => {
 	const newId = Math.floor(Math.random() * 1000000)
 	return String(newId)
 }
@@ -66,7 +69,7 @@ app.post('/api/persons', (request, response) => {
 		const newPerson = {
 			name: body.name,
 			number: body.number,
-			id: gerenateId()
+			id: generateId()
 		}
 		persons = persons.concat(newPerson)
 		response.json(newPerson)
