@@ -55,6 +55,12 @@ const gerenateId = () => {
 app.post('/api/persons', (request, response) => {
 	const body = request.body
 	if (body.name && body.number) {
+		const exist = persons.find(p => p.name === body.name)
+		if (exist) {
+			return response.status(400).json({
+				error: "The name already exists in the phonebook"
+			})
+		}
 		const newPerson = {
 			name: body.name,
 			number: body.number,
@@ -64,7 +70,7 @@ app.post('/api/persons', (request, response) => {
 		response.json(newPerson)
 	} else {
 		return response.status(400).json({
-			error: "name or number missing"
+			error: "The name or number missing"
 		})
 	}
 })
