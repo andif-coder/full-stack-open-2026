@@ -22,13 +22,13 @@ const Country = ({country}) => {
 		</div>
 	)
 }
-const ShowCountries = ({countriesToShow, elseShowCountryFunc}) => {
+const ShowCountries = ({countriesToShow, showCountry}) => {
 	if (countriesToShow.length > 10) {
 		return <div><p>Too many matches, specify another filter</p></div>
 	} else if (countriesToShow.length > 1) {
 		return (
 			<div>
-				{countriesToShow.map(c => <p key={c.cca2}>{c.name.common} <button onClick={elseShowCountryFunc(c)}>show</button></p>)}
+				{countriesToShow.map(c => <p key={c.cca2}>{c.name.common} <button onClick={() => { showCountry(c.name.common) }}>show</button></p>)}
 			</div>
 		)
 	} else if (countriesToShow.length === 1) {
@@ -76,16 +76,9 @@ const ShowWeather = ({country}) => {
 const App = () => {
 	const [filter, setFilter] = useState('')
 	const [allCountriesInfo, setAllCountriesInfo] = useState([])
-	const [elseShowCountry, setElseShowCountry] = useState([])
-	const elseShowCountryFunc = (country) => {
-		return () => {
-			setElseShowCountry([].concat(country))
-		}
-	}
 	const handleFilter = (event) => {
 		console.log(event.target.value)
 		setFilter(event.target.value)
-		setElseShowCountry([])
 	}
 	useEffect(() => {
 		countriesServices
@@ -105,7 +98,7 @@ const App = () => {
   return (
 		<div>
 			<Filter filter={filter} onChange={handleFilter} />
-			<ShowCountries countriesToShow={elseShowCountry.length ? elseShowCountry : countriesToShow} elseShowCountryFunc={elseShowCountryFunc} />
+			<ShowCountries countriesToShow={countriesToShow} showCountry={setFilter} />
 		</div>
   )
 }
