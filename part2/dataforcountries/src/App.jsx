@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import countriesServices from './services/countries'
+import weatherServices from './services/weather'
 const Filter = ({filter, onChange}) => {
 	return (
 		<div>
@@ -11,11 +12,11 @@ const Country = ({country}) => {
 	return (
 		<div>
 			<h1>{country.name.common}</h1>
-			<p>{country.capital?.join(', ')}</p>
+			<p>{country.capital?.[0]}</p>
 			<p>{country.area}</p>
 			<h1>Languages</h1>
 			<ul>
-				{Object.values(country.languages || {}).map(c => <li key={c.cca2}>{c}</li>)}
+				{Object.values(country.languages || {}).map(c => <li key={c}>{c}</li>)}
 			</ul>
 			<img src={country.flags.png} alt='国旗' width='150' />
 		</div>
@@ -32,10 +33,44 @@ const ShowCountries = ({countriesToShow, elseShowCountryFunc}) => {
 		)
 	} else if (countriesToShow.length === 1) {
 		const country = countriesToShow[0]
-		return <Country country={country} />
+		return (
+			<div>
+				<Country country={country} />
+				<ShowWeather country={country} />
+			</div>
+		)
 	}
 	return (
 		<div></div>
+	)
+}
+const ShowWeather = ({country}) => {
+	const [weather, setWeather] = useState(null)
+	useEffect(() => {
+		weatherServices
+			.getWeatherOf(country)
+			.then(ret => {
+				console.log(`获取${country.capital?.[0]}的天气成功，数据：`)
+				console.log(ret)
+				setWeather(ret)
+			})
+			.catch(error => {
+				console.log(`获取${country.capital?.[0]}的天气失败，报错：${error}`)
+			})
+	}, [country])
+	if (!weather) {
+		return (
+			<div>Loading weather...</div>
+		)
+	}
+	console.log(weather.weather[0].icon)
+	return (
+		<div>
+			<h1>Weather in {country.capital?.[0]}</h1>
+			<p>Temperature {weather.main.temp} Celsius</p>
+			<img src={`https://openweathermap.org/payload/api/media/file/${weather.weather[0].icon}.png`} alt='weather icon' />
+			<p>Wind {weather.wind.speed} m/s</p>
+		</div>
 	)
 }
 const App = () => {
