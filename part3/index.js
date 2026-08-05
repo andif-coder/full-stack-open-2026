@@ -82,6 +82,14 @@ app.post('/api/persons', (request, response) => {
 		})
 	}
 })
+app.put('/api/persons/:id', (request, response) => {
+	const body = request.body
+	console.log(body)
+	const id = String(request.params.id)
+	console.log(id)
+	persons = persons.map(p => p.id === id ? body : p)
+	response.json(body)
+})
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
 	console.log(`phonebook server running on port ${PORT}`)
