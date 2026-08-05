@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "deploy": "vite build && rm -rf ../../part3/dist && cp -r dist ../../part3/",
     "lint": "oxlint",
     "preview": "vite preview",
 		"server": "npx json-server --port 3001 db.json"
