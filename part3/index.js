@@ -9,14 +9,14 @@ morgan.token('body', (req) => {
 app.use(express.json())
 app.use(express.static('dist'))
 app.use(morgan(':method :url :status :response-time ms :body'))
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
 	Person.find({})
 		.then(persons => {
 			response.json(persons)
 		})
 		.catch(error => next(error))
 })
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
 	Person.findById(request.params.id)
 		.then(p => {
 			if (p) {
@@ -28,7 +28,7 @@ app.get('/api/persons/:id', (request, response) => {
 		})
 		.catch(error => next(error))
 })
-app.get('/info', (request, response) => {
+app.get('/info', (request, response, next) => {
 	Person.find({})
 		.then(persons => {
 			const now = new Date()
@@ -40,14 +40,14 @@ app.get('/info', (request, response) => {
 		})
 		.catch(error => next(error))
 })
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
 	Person.findByIdAndDelete(request.params.id)
 		.then(ret => {
 			response.status(204).end()
 		})
 		.catch(error => next(error))
 })
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
 	const body = request.body
 	if (body.name && body.number) {
 		const newPerson = new Person({
@@ -65,19 +65,18 @@ app.post('/api/persons', (request, response) => {
 		})
 	}
 })
-app.put('/api/persons/:id', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
 	const body = request.body
-	const person = {
-		name: body.name,
-		number: body.number,
-	}
-	Person.findByIdAndUpdate(request.params.id, person, {new: true, runValidators: true, context: 'query'})
-		.then(updatedPerson => {
-			if (updatedPerson) {
-				response.json(updatedPerson)
-			} else {
-				response.status(404).end()
+	Person.findById(request.params.id)
+		.then(p => {
+			if (!p) {
+				return response.status(404).end()
 			}
+			p.name = body.name
+			p.number = body.number
+			return p.save().then(updatedPerson => {
+				response.json(updatedPerson)
+			})
 		})
 		.catch(error => next(error))
 })
