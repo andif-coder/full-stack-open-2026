@@ -14,9 +14,7 @@ app.get('/api/persons', (request, response) => {
 		.then(persons => {
 			response.json(persons)
 		})
-		.catch(error => {
-			console.log('error getting phonebook: ', error.message)
-		})
+		.catch(error => next(error))
 })
 app.get('/api/persons/:id', (request, response) => {
 	Person.findById(request.params.id)
@@ -28,10 +26,7 @@ app.get('/api/persons/:id', (request, response) => {
 				response.status(404).end()
 			}
 		})
-		.catch(error => {
-			console.log(`cant find ${request.params.id}, error: ${error.message}`)
-			response.status(404).end()
-		})
+		.catch(error => next(error))
 })
 app.get('/info', (request, response) => {
 	Person.find({})
@@ -43,19 +38,14 @@ app.get('/info', (request, response) => {
 			`
 			response.send(content)
 		})
-		.catch(error => {
-			console.log('error getting phonebook: ', error.message)
-		})
+		.catch(error => next(error))
 })
 app.delete('/api/persons/:id', (request, response) => {
 	Person.findByIdAndDelete(request.params.id)
 		.then(ret => {
 			response.status(204).end()
 		})
-		.catch(error => {
-			console.log(`can't delete ${request.params.id}, error: ${error.message}`)
-			response.status(204).end()
-		})
+		.catch(error => next(error))
 })
 app.post('/api/persons', (request, response) => {
 	const body = request.body
@@ -68,9 +58,7 @@ app.post('/api/persons', (request, response) => {
 			.then(savedPerson => {
 				response.json(savedPerson)
 			})
-			.catch(error =>	{
-				console.log(`error adding person ${body.name}, error: ${error.message}`)
-			})
+			.catch(error =>	next(error))
 	} else {
 		return response.status(400).json({
 			error: "The name or number missing"
@@ -91,10 +79,18 @@ app.put('/api/persons/:id', (request, response) => {
 				response.status(404).end()
 			}
 		})
-		.catch(error => {
-				console.log(`error updating person ${body.name}, error: ${error.message}`)
-		})
+		.catch(error => next(error))
 })
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message) // 统一打印错误堆栈信息
+  // 1. 拦截特定错误：如果是 Mongo 的 ID 格式错误
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+  // 2. 如果是其他未知的错误，继续交给 Express 内置的默认错误处理机制
+  next(error)
+}
+app.use(errorHandler)
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
 	console.log(`phonebook server running on port ${PORT}`)
