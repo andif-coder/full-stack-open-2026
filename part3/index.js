@@ -49,21 +49,15 @@ app.delete('/api/persons/:id', (request, response, next) => {
 })
 app.post('/api/persons', (request, response, next) => {
 	const body = request.body
-	if (body.name && body.number) {
-		const newPerson = new Person({
-			name: body.name,
-			number: body.number,
+	const newPerson = new Person({
+		name: body.name,
+		number: body.number,
+	})
+	newPerson.save()
+		.then(savedPerson => {
+			response.json(savedPerson)
 		})
-		newPerson.save()
-			.then(savedPerson => {
-				response.json(savedPerson)
-			})
-			.catch(error =>	next(error))
-	} else {
-		return response.status(400).json({
-			error: "The name or number missing"
-		})
-	}
+		.catch(error =>	next(error))
 })
 app.put('/api/persons/:id', (request, response, next) => {
 	const body = request.body
@@ -85,7 +79,9 @@ const errorHandler = (error, request, response, next) => {
   // 1. 拦截特定错误：如果是 Mongo 的 ID 格式错误
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  }
+  } else if (error.name === 'ValidationError') {
+		return response.status(400).json({ error: error.message })
+	}
   // 2. 如果是其他未知的错误，继续交给 Express 内置的默认错误处理机制
   next(error)
 }

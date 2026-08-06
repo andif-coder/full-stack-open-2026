@@ -74,6 +74,13 @@ const App = () => {
 	const handleFilter = (event) => {
 		setFilter(event.target.value)
 	}
+	const setNewMsg = (type, content) => {
+		const newMsg = { type, content }
+		setMsgObj(newMsg)
+		setTimeout(() => {
+			setMsgObj({type: 'success', content: null})
+		}, 3000)
+	}
 	const addPerson = (event) => {
 		event.preventDefault()
 		const exist = persons.some(person => person.name === newName)
@@ -87,29 +94,14 @@ const App = () => {
 				personServices
 					.update(changedPerson)
 					.then(response => {
-						const newMsg = {
-							type: 'success',
-							content: '修改' + response.name + '对应号码成功'
-						}
-						setMsgObj(newMsg)
-						setTimeout(() => {
-							setMsgObj({type: 'success', content: null})
-						}, 3000)
+						setNewMsg('success', '修改' + response.name + '对应号码成功')
 						console.log(`成功修改${response.name}电话号码为${response.number}`)
 						setPersons(persons.map(p => p.id !== response.id ? p : response))
 						setNewName('')
 						setNewNum('')
 					})
 					.catch(error => {
-						console.log(`修改${changedPerson.name}电话号码为${newNum}失败, 报错为：`, error)
-						const newMsg = {
-							type: 'error',
-							content: '修改' + changedPerson.name + '对应号码失败，该用户已经被删除'
-						}
-						setMsgObj(newMsg)
-						setTimeout(() => {
-							setMsgObj({type: 'success', content: null})
-						}, 3000)
+						setNewMsg('error', error.response.data.error)
 						setPersons(persons.filter(p => p.id !== changedPerson.id))
 						setNewName('')
 						setNewNum('')
@@ -125,20 +117,14 @@ const App = () => {
 			.create(newPerson)
 			.then(person => {
 				console.log(`新增${newPerson.name}成功，数据: ${person.name}`)
-				const newMsg = {
-					type: 'success',
-					content: '新增' + newPerson.name + '成功'
-				}
-				setMsgObj(newMsg)
-				setTimeout(() => {
-					setMsgObj({type: 'success', content: null})
-				}, 3000)
+				setNewMsg('success', '新增' + newPerson.name + '成功')
 				setPersons(persons.concat(person))
 				setNewName('')
 				setNewNum('')
 			})
 			.catch(error => {
 				console.log(`新增${newPerson.name}失败，报错: ${error}`)
+				setNewMsg('error', error.response.data.error)
 			})
 	}
 	const personsToShow = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
