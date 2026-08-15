@@ -1,5 +1,6 @@
 const express = require('express')
 const morgan = require('morgan')
+const logger = require('./utils/logger')
 require('dotenv').config()
 const Person = require('./models/people')
 const app = express()
@@ -22,7 +23,7 @@ app.get('/api/persons/:id', (request, response, next) => {
       if (p) {
         response.json(p)
       } else {
-        console.log(`cant find ${request.params.id}`)
+				logger.info(`cant find ${request.params.id}`)
         response.status(404).end()
       }
     })
@@ -75,7 +76,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message) // 统一打印错误堆栈信息
+  logger.error(error.message) // 统一打印错误堆栈信息
   // 1. 拦截特定错误：如果是 Mongo 的 ID 格式错误
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
@@ -88,5 +89,5 @@ const errorHandler = (error, request, response, next) => {
 app.use(errorHandler)
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`phonebook server running on port ${PORT}`)
+  logger.info(`phonebook server running on port ${PORT}`)
 })
