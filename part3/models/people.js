@@ -1,7 +1,7 @@
+const config = require('../utils/config')
 const mongoose = require('mongoose')
-const url = process.env.MONGODB_URL
 mongoose.set('strictQuery',false)
-mongoose.connect(url, { family: 4 })
+mongoose.connect(config.MONGODB_URL, { family: 4 })
   .then(() => {
     console.log('connected to MongoDB')
   })

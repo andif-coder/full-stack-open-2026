@@ -1,7 +1,7 @@
 const express = require('express')
 const morgan = require('morgan')
 const logger = require('./utils/logger')
-require('dotenv').config()
+const config = require('./utils/config')
 const Person = require('./models/people')
 const app = express()
 morgan.token('body', (req) => {
@@ -87,7 +87,7 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 app.use(errorHandler)
-const PORT = process.env.PORT || 3001
+const PORT = config.PORT || 3001
 app.listen(PORT, () => {
   logger.info(`phonebook server running on port ${PORT}`)
 })
