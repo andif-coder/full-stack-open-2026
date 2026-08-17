@@ -1,3 +1,4 @@
+const logger = require('../utils/logger')
 // 请求输出中间件，可以输出每次请求的语句
 const morgan = require('morgan')
 morgan.token('body', (req) => {
