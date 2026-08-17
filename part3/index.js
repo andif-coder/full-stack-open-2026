@@ -1,15 +1,12 @@
 const express = require('express')
-const morgan = require('morgan')
 const logger = require('./utils/logger')
 const config = require('./utils/config')
+const middleWare = require('./utils/middleware')
 const Person = require('./models/people')
 const app = express()
-morgan.token('body', (req) => {
-  return JSON.stringify(req.body)
-})
-app.use(express.json())
 app.use(express.static('dist'))
-app.use(morgan(':method :url :status :response-time ms :body'))
+app.use(express.json())
+app.use(middleWare.requestLogger)
 app.get('/api/persons', (request, response, next) => {
   Person.find({})
     .then(persons => {
