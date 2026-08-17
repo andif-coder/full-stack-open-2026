@@ -7,7 +7,7 @@ const app = express()
 app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleWare.requestLogger)
-app.get('/api/persons', (request, response, next) => {
+app.get('/api/persons', (_request, response, next) => {
   Person.find({})
     .then(persons => {
       response.json(persons)
@@ -26,7 +26,7 @@ app.get('/api/persons/:id', (request, response, next) => {
     })
     .catch(error => next(error))
 })
-app.get('/info', (request, response, next) => {
+app.get('/info', (_request, response, next) => {
   Person.find({})
     .then(persons => {
       const now = new Date()
@@ -72,18 +72,8 @@ app.put('/api/persons/:id', (request, response, next) => {
     })
     .catch(error => next(error))
 })
-const errorHandler = (error, request, response, next) => {
-  logger.error(error.message) // 统一打印错误堆栈信息
-  // 1. 拦截特定错误：如果是 Mongo 的 ID 格式错误
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
-  }
-  // 2. 如果是其他未知的错误，继续交给 Express 内置的默认错误处理机制
-  next(error)
-}
-app.use(errorHandler)
+app.use(middleWare.unkownEndpoint)
+app.use(middleWare.errorHandler)
 const PORT = config.PORT || 3001
 app.listen(PORT, () => {
   logger.info(`phonebook server running on port ${PORT}`)
