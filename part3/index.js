@@ -1,15 +1,6 @@
-const express = require('express')
+const app = require('./app')
 const logger = require('./utils/logger')
 const config = require('./utils/config')
-const middleWare = require('./utils/middleware')
-const peopleRouter = require('./controllers/people')
-const app = express()
-app.use(express.static('dist'))
-app.use(express.json())
-app.use(middleWare.requestLogger)
-app.use('/api/persons', peopleRouter)
-app.use(middleWare.unkownEndpoint)
-app.use(middleWare.errorHandler)
 const PORT = config.PORT || 3001
 app.listen(PORT, () => {
   logger.info(`phonebook server running on port ${PORT}`)
