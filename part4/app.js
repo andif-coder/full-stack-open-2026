@@ -8,11 +8,7 @@ const app = express()
 // 连接数据库
 const mongoose = require('mongoose')
 mongoose.set('strictQuery',false)
-const MONGODB_URL = process.env.NODE_ENV === 'test'
-	? process.env.TEST_MONGODB_URL
-	: process.env.MONGODB_URL
-logger.info(MONGODB_URL)
-mongoose.connect(MONGODB_URL, { family: 4 })
+mongoose.connect(config.MONGODB_URL, { family: 4 })
   .then(() => {
     logger.info('connected to MongoDB')
   })
