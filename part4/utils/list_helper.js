@@ -1,5 +1,5 @@
 const dummy = (_blogs) => {
-  return _blogs || 1
+  return 1 || _blogs
 }
 const totalLikes = (blogs) => {
   return blogs.reduce((sum, blog) => {
