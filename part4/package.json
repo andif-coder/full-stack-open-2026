@@ -15,8 +15,14 @@
   "dependencies": {
     "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
+    "eslint": "^10.8.1",
     "express": "^5.2.1",
     "mongoose": "^9.9.2",
     "morgan": "^1.11.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "globals": "^17.11.0"
   }
 }
