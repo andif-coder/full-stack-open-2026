@@ -92,8 +92,10 @@ describe('http test', () => {
 			.expect('Content-Type', /application\/json/)
 		const response = await api.get('/api/blogs')
 		const titles = response.body.map(r => r.title)
+		const author = response.body.map(r => r.author)
 		assert.strictEqual(response.body.length, initialBlogs.length + 1)
 		assert(titles.includes('GOAT KOBE'))
+		assert(author.includes('cwj'))
 	})
 	after(async () => {
 		await mongoose.connection.close()
