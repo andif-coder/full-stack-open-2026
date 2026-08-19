@@ -85,6 +85,7 @@ describe('http test', () => {
     	likes: 6,
     	__v: 0
 		}
+		const dataBefore = await api.get('/api/blogs')
 		await api
 			.post('/api/blogs')
 			.send(newBlog)
@@ -93,7 +94,7 @@ describe('http test', () => {
 		const response = await api.get('/api/blogs')
 		const titles = response.body.map(r => r.title)
 		const author = response.body.map(r => r.author)
-		assert.strictEqual(response.body.length, initialBlogs.length + 1)
+		assert.strictEqual(response.body.length, dataBefore.body.length + 1)
 		assert(titles.includes('GOAT KOBE'))
 		assert(author.includes('cwj'))
 	})
@@ -112,6 +113,38 @@ describe('http test', () => {
 			.expect('Content-Type', /application\/json/)
 		const newBlog = await Blog.findById(response.body.id)
 		assert.strictEqual(newBlog.likes, 0)
+	})
+	test('obj without title', async () => {
+		const blog = {
+			_id: "5a422bc61b54a676234d17ff",
+    	author: "cwj",
+    	url: "http://www.cwj.com",
+			likes: 1,
+    	__v: 0
+		}
+		const dataBefore = await api.get('/api/blogs')
+		await api
+			.post('/api/blogs')
+			.send(blog)
+			.expect(400)
+		const dataAfter = await api.get('/api/blogs')
+		assert.strictEqual(dataAfter.body.length, dataBefore.body.length)
+	})
+	test('obj without url', async () => {
+		const blog = {
+			_id: "5a422bc61b54a676234d1711",
+    	title: "GOAT Jordan",
+    	author: "cwj",
+			likes: 1,
+    	__v: 0
+		}
+		const dataBefore = await api.get('/api/blogs')
+		await api
+			.post('/api/blogs')
+			.send(blog)
+			.expect(400)
+		const dataAfter = await api.get('/api/blogs')
+		assert.strictEqual(dataAfter.body.length, dataBefore.body.length)
 	})
 	after(async () => {
 		await mongoose.connection.close()
