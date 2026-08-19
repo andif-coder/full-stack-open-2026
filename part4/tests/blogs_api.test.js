@@ -68,6 +68,14 @@ describe('http test', () => {
 			.expect('Content-Type', /application\/json/)
 		assert.strictEqual(response.body.length, initialBlogs.length)
 	})
+	test('id but not __id', async () => {
+		const response = await api.get('/api/blogs')
+		response.body.forEach((r) => {
+			assert.strictEqual(Object.hasOwn(r, '_id'), false)
+			assert.strictEqual(Object.hasOwn(r, 'id'), true)
+			assert.strictEqual(typeof r.id, 'string')
+		})
+	})
 	test('a valid can be used', async () => {
 		const newBlog = {
 			_id: "5a422bc61b54a676234d17fd",
