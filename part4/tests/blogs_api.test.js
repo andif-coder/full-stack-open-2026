@@ -3,8 +3,9 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog.js')
+const assert = require('node:assert')
 const api = supertest(app)
-const blogs_list = [
+const initialBlogs = [
   {
     _id: "5a422a851b54a676234d17f7",
     title: "React patterns",
@@ -58,7 +59,7 @@ describe('http test', () => {
 	beforeEach(async () => {
 		// 清空集合中的所有旧数据
 		await Blog.deleteMany({})
-		const blogObjs = blogs_list.map(blog => new Blog(blog))
+		const blogObjs = initialBlogs.map(blog => new Blog(blog))
 		const promiseArray = blogObjs.map(blog => blog.save())
 		await Promise.all(promiseArray)
 	})
@@ -67,6 +68,25 @@ describe('http test', () => {
 			.get('/api/blogs')
 			.expect(200)
 			.expect('Content-Type', /application\/json/)
+	})
+	test('a valid can be used', async () => {
+		const newBlog = {
+			_id: "5a422bc61b54a676234d17fd",
+    	title: "GOAT KOBE",
+    	author: "cwj",
+    	url: "http://www.cwj.com",
+    	likes: 6,
+    	__v: 0
+		}
+		await api
+			.post('/api/blogs')
+			.send(newBlog)
+			.expect(201)
+			.expect('Content-Type', /application\/json/)
+		const response = await api.get('/api/blogs')
+		const titles = response.body.map(r => r.title)
+		assert.strictEqual(response.body.length, initialBlogs.length + 1)
+		assert(titles.includes('GOAT KOBE'))
 	})
 	after(async () => {
 		await mongoose.connection.close()
