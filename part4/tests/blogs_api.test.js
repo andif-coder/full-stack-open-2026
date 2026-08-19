@@ -59,9 +59,7 @@ describe('http test', () => {
 	beforeEach(async () => {
 		// 清空集合中的所有旧数据
 		await Blog.deleteMany({})
-		const blogObjs = initialBlogs.map(blog => new Blog(blog))
-		const promiseArray = blogObjs.map(blog => blog.save())
-		await Promise.all(promiseArray)
+		await Blog.insertMany(initialBlogs)
 	})
 	test('blogs are returned as json', async () => {
 		await api
