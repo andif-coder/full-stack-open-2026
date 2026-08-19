@@ -62,10 +62,11 @@ describe('http test', () => {
 		await Blog.insertMany(initialBlogs)
 	})
 	test('blogs are returned as json', async () => {
-		await api
+		const response = await api
 			.get('/api/blogs')
 			.expect(200)
 			.expect('Content-Type', /application\/json/)
+		assert.strictEqual(response.body.length, initialBlogs.length)
 	})
 	test('a valid can be used', async () => {
 		const newBlog = {
