@@ -97,6 +97,22 @@ describe('http test', () => {
 		assert(titles.includes('GOAT KOBE'))
 		assert(author.includes('cwj'))
 	})
+	test('obj without likes', async () => {
+		const blog = {
+			_id: "5a422bc61b54a676234d17fe",
+    	title: "GOAT Jordan",
+    	author: "cwj",
+    	url: "http://www.cwj.com",
+    	__v: 0
+		}
+		const response = await api
+			.post('/api/blogs')
+			.send(blog)
+			.expect(201)
+			.expect('Content-Type', /application\/json/)
+		const newBlog = await Blog.findById(response.body.id)
+		assert.strictEqual(newBlog.likes, 0)
+	})
 	after(async () => {
 		await mongoose.connection.close()
 	})
