@@ -3,6 +3,7 @@ const config = require('./utils/config')
 const logger = require('./utils/logger')
 const middleWare = require('./utils/middleware')
 const blogRouter = require('./controllers/blog')
+const userRouter = require('./controllers/user')
 const app = express()
 
 // 连接数据库
@@ -19,6 +20,7 @@ app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleWare.requestLogger)
 app.use('/api/blogs', blogRouter)
+app.use('/api/users', userRouter)
 app.use(middleWare.unkownEndpoint)
 app.use(middleWare.errorHandler)
 
