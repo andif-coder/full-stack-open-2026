@@ -154,6 +154,8 @@ describe('http test', () => {
 			.expect(204)
 		const dataAfter = await api.get('/api/blogs')
 		assert.strictEqual(dataAfter.body.length + 1, dataBefore.body.length)
+		const idAfter = dataAfter.body.map(r => r.id);
+		assert(!idAfter.includes(id));
 	})
 	after(async () => {
 		await mongoose.connection.close()
