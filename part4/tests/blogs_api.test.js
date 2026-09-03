@@ -146,6 +146,15 @@ describe('http test', () => {
 		const dataAfter = await api.get('/api/blogs')
 		assert.strictEqual(dataAfter.body.length, dataBefore.body.length)
 	})
+	test('del obj', async () => {
+		const dataBefore = await api.get('/api/blogs')
+		const id = dataBefore.body[0].id;
+		await api
+			.delete(`/api/blogs/${id}`)
+			.expect(204)
+		const dataAfter = await api.get('/api/blogs')
+		assert.strictEqual(dataAfter.body.length + 1, dataBefore.body.length)
+	})
 	after(async () => {
 		await mongoose.connection.close()
 	})
