@@ -157,6 +157,19 @@ describe('http test', () => {
 		const idAfter = dataAfter.body.map(r => r.id);
 		assert(!idAfter.includes(id));
 	})
+	test('put obj', async () => {
+		const dataBefore = await api.get('/api/blogs')
+		const id = dataBefore.body[0].id;
+		const blog = { ...dataBefore.body[0], likes: 99 };
+		await api
+			.put(`/api/blogs/${id}`)
+			.send(blog)
+			.expect(200)
+		const dataAfter = await api.get('/api/blogs')
+		const idLikesAfter = dataAfter.body.map(r => ({id: r.id, likes: r.likes}));
+		const blogAfter = idLikesAfter.find(b => { return b.id === id });
+		assert(blogAfter.likes == 99);
+	})
 	after(async () => {
 		await mongoose.connection.close()
 	})
