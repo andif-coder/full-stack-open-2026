@@ -23,7 +23,7 @@ app.use(middleWare.requestLogger)
 app.use('/api/blogs', blogRouter)
 app.use('/api/users', userRouter)
 app.use('/api/login', loginRouter)
-app.use(middleWare.unkownEndpoint)
+app.use(middleWare.unknownEndpoint)
 app.use(middleWare.errorHandler)
 
 module.exports = app
