@@ -1,24 +1,16 @@
 const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
-const User = require('../models/user')
-const jwt = require('jsonwebtoken')
+const middleWare = require('../utils/middleware')
 blogRouter.get('/', async (_request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
 	response.json(blogs)
 })
-blogRouter.post('/', async (request, response) => {
+blogRouter.post('/', middleWare.userExtractor, async (request, response) => {
   const body = request.body;
 	// check begin
-	const token = request.token;
-	if (!token) {
-		return response.status(401).json({
-			error: 'token missing'
-		})
-	}
-	const { username, id } = jwt.verify(token, process.env.SECRET)
-	const user = await User.findById(id);
+	const user = request.user;
 	if (user == null) {
-		return response.status(400).json({
+		return response.status(401).json({
 			error: 'user is null'
 		})
 	}
@@ -28,36 +20,29 @@ blogRouter.post('/', async (request, response) => {
     author: body.author,
     url: body.url,
     likes: 'likes' in body ? body.likes : 0,
-		user: id
+		user: user._id
   })
   const savedBlog = await blog.save()
 	user.blogs = (user.blogs || []).concat(savedBlog._id);
 	await user.save();
   response.status(201).json(savedBlog)
 })
-blogRouter.delete('/:id', async (request, response) => {
+blogRouter.delete('/:id', middleWare.userExtractor, async (request, response) => {
 	// check begin
-	const token = request.token;
-	if (!token) {
-		return response.status(401).json({
-			error: 'token missing'
-		})
-	}
-	const { username, id } = jwt.verify(token, process.env.SECRET);
 	const blog = await Blog.findById(request.params.id);
 	if (!blog) {
 		return response.status(404).json({
 			error: 'blog isn\'t exist'
 		})
 	}
-	if (id.toString() != blog.user.toString()) {
+	const user = request.user;
+	if (!user || (user._id.toString() != blog.user.toString())) {
 		return response.status(401).json({
 			error: 'user is uncorrect'
 		})
 	}
 	// check end
 	await Blog.findByIdAndDelete(request.params.id);
-	const user = await User.findById(id);
 	user.blogs = user.blogs.filter(b => b.toString() !== request.params.id);
 	await user.save();
 	response.status(204).end();

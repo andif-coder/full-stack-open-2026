@@ -1,4 +1,6 @@
 const logger = require('./logger')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 const errorHandler = (error, _request, response, next) => {
   logger.error(error.message)
   if (error.name === 'CastError') {
@@ -26,5 +28,16 @@ const tokenExtractor = (request, _response, next) => {
 	}
 	next();
 }
+const userExtractor = async (request, response, next) => {
+	const token = request.token;
+	if (!token) {
+		return response.status(401).json({
+			error: 'token missing'
+		})
+	}
+	const { username, id } = jwt.verify(token, process.env.SECRET)
+	request.user = await User.findById(id);
+	next();
+}
 const requestLogger = morgan(':method :url :status :response-time ms :body')
-module.exports = { errorHandler, unknownEndpoint, requestLogger, tokenExtractor }
+module.exports = { errorHandler, unknownEndpoint, requestLogger, tokenExtractor, userExtractor }
