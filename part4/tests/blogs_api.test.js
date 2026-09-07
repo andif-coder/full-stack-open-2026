@@ -2,71 +2,36 @@ const { test, after, describe, beforeEach } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
-const Blog = require('../models/blog.js')
+const Blog = require('../models/blog')
+const User = require('../models/user')
+const helper = require('./test_helper')
 const assert = require('node:assert')
 const api = supertest(app)
-const initialBlogs = [
-  {
-    _id: "5a422a851b54a676234d17f7",
-    title: "React patterns",
-    author: "Michael Chan",
-    url: "https://reactpatterns.com/",
-    likes: 7,
-    __v: 0
-  },
-  {
-    _id: "5a422aa71b54a676234d17f8",
-    title: "Go To Statement Considered Harmful",
-    author: "Edsger W. Dijkstra",
-    url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
-    likes: 5,
-    __v: 0
-  },
-  {
-    _id: "5a422b3a1b54a676234d17f9",
-    title: "Canonical string reduction",
-    author: "Edsger W. Dijkstra",
-    url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-    likes: 12,
-    __v: 0
-  },
-  {
-    _id: "5a422b891b54a676234d17fa",
-    title: "First class tests",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
-    likes: 10,
-    __v: 0
-  },
-  {
-    _id: "5a422ba71b54a676234d17fb",
-    title: "TDD harms architecture",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-    likes: 0,
-    __v: 0
-  },
-  {
-    _id: "5a422bc61b54a676234d17fc",
-    title: "Type wars",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
-    likes: 2,
-    __v: 0
-  }  
-]
 describe('http test', () => {
+	let token = null;
 	beforeEach(async () => {
 		// 清空集合中的所有旧数据
 		await Blog.deleteMany({})
-		await Blog.insertMany(initialBlogs)
+		await User.deleteMany({})
+		// Get Token
+		const testUser = { username: 'test_root', password: '112233' };
+		await api.post('/api/users').send(testUser);
+		const userGetResponse = await api.post('/api/login').send(testUser);
+		token = userGetResponse.body.token;
+		// insert initial blogs
+		for (const blog of helper.initialBlogs) {
+			await api
+				.post('/api/blogs')
+				.set('Authorization', `Bearer ${token}`)
+				.send(blog)
+		}
 	})
 	test('blogs are returned as json', async () => {
 		const response = await api
 			.get('/api/blogs')
 			.expect(200)
 			.expect('Content-Type', /application\/json/)
-		assert.strictEqual(response.body.length, initialBlogs.length)
+		assert.strictEqual(response.body.length, helper.initialBlogs.length)
 	})
 	test('id but not __id', async () => {
 		const response = await api.get('/api/blogs')
@@ -88,6 +53,7 @@ describe('http test', () => {
 		const dataBefore = await api.get('/api/blogs')
 		await api
 			.post('/api/blogs')
+			.set('Authorization', `Bearer ${token}`)
 			.send(newBlog)
 			.expect(201)
 			.expect('Content-Type', /application\/json/)
@@ -108,6 +74,7 @@ describe('http test', () => {
 		}
 		const response = await api
 			.post('/api/blogs')
+			.set('Authorization', `Bearer ${token}`)
 			.send(blog)
 			.expect(201)
 			.expect('Content-Type', /application\/json/)
@@ -125,6 +92,7 @@ describe('http test', () => {
 		const dataBefore = await api.get('/api/blogs')
 		await api
 			.post('/api/blogs')
+			.set('Authorization', `Bearer ${token}`)
 			.send(blog)
 			.expect(400)
 		const dataAfter = await api.get('/api/blogs')
@@ -141,6 +109,7 @@ describe('http test', () => {
 		const dataBefore = await api.get('/api/blogs')
 		await api
 			.post('/api/blogs')
+			.set('Authorization', `Bearer ${token}`)
 			.send(blog)
 			.expect(400)
 		const dataAfter = await api.get('/api/blogs')
@@ -151,6 +120,7 @@ describe('http test', () => {
 		const id = dataBefore.body[0].id;
 		await api
 			.delete(`/api/blogs/${id}`)
+			.set('Authorization', `Bearer ${token}`)
 			.expect(204)
 		const dataAfter = await api.get('/api/blogs')
 		assert.strictEqual(dataAfter.body.length + 1, dataBefore.body.length)
@@ -169,6 +139,22 @@ describe('http test', () => {
 		const idLikesAfter = dataAfter.body.map(r => ({id: r.id, likes: r.likes}));
 		const blogAfter = idLikesAfter.find(b => { return b.id === id });
 		assert(blogAfter.likes == 99);
+	})
+	test('post without token', async () => {
+		const blog = {
+			_id: "3a422bc61b54a676234d1711",
+    	title: "GOAT Jordan Mini",
+    	author: "cwj_mini",
+			likes: 0,
+    	__v: 0
+		}
+		const dataBefore = await api.get('/api/blogs')
+		await api
+			.post('/api/blogs')
+			.send(blog)
+			.expect(401)
+		const dataAfter = await api.get('/api/blogs')
+		assert.strictEqual(dataAfter.body.length, dataBefore.body.length)
 	})
 	after(async () => {
 		await mongoose.connection.close()
