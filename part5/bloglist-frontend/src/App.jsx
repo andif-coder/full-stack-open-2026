@@ -65,8 +65,13 @@ const App = () => {
 			console.log('create new failed')
 		}
 	}
-	const updateLikes = async (updatedBlog) => {
+	const updateLikes = async (updateBlog) => {
+		const updatedBlog = await blogService.update(updateBlog)
 		setBlogs(blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b))
+	}
+	const removeBlog = async (removeBlog) => {
+		await blogService.remove(removeBlog)
+		setBlogs(blogs.filter(b => b.id !== removeBlog.id))
 	}
 	const loginForm = () => {
 		return (
@@ -89,6 +94,7 @@ const App = () => {
 			</form>
 		)
 	}
+	console.log('cwj user: ', user)
 	const blogForm = () => {
 		return (
 			<div>
@@ -99,7 +105,7 @@ const App = () => {
 				<CreateBlog handleCreate={handleCreate} />
 			</Togglable>
       {blogs.sort((a, b) => { return b.likes - a.likes }).map(blog =>
-        <Blog key={blog.id} blog={blog} updateLikes={updateLikes} />
+        <Blog key={blog.id} blog={blog} updateLikes={updateLikes} removeBlog={removeBlog} user={user}/>
       )}
 			</div>
 		)

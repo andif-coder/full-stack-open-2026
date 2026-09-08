@@ -1,6 +1,6 @@
 import { useState } from "react"
 import blogService from '../services/blogs'
-const Blog = ({ blog, updateLikes }) => {
+const Blog = ({ blog, updateLikes, removeBlog, user }) => {
 	const [isShow, setIsShow] = useState(false)
 	const blogStyle = {
 		paddingTop: 10,
@@ -12,6 +12,8 @@ const Blog = ({ blog, updateLikes }) => {
 	const noneStyle = { display: 'none' }
 	const showStyle = isShow ? blogStyle : noneStyle;
 	const hiddenStyle = !isShow ? blogStyle : noneStyle;
+	// console.log('cwj username: ', user.username, ' blog.user.username: ', blog.user.username)
+	const showRemove = user?.username === blog.user?.username
 	const handleShow = () => {
 		setIsShow(!isShow)
 	}
@@ -21,8 +23,11 @@ const Blog = ({ blog, updateLikes }) => {
 			likes: blog.likes + 1,
 			user: blog.user?.id || blog.user
 		}
-		const updatedBlog = await blogService.update(updateBlog)
-		updateLikes(updatedBlog)
+		updateLikes(updateBlog)
+	}
+	const deleteBlog = async () => {
+		const check = window.confirm(`Remove blog ${blog.title} by ${blog.author}`)
+		if (check) removeBlog(blog)
 	}
 	return (
 		<div>
@@ -34,6 +39,7 @@ const Blog = ({ blog, updateLikes }) => {
 				<div>{blog.url}</div>
 				<div>likes {blog.likes} <button type="button" onClick={addlikes}>like</button></div>
 				<div>{blog.user?.name}</div>
+				<div>{showRemove && <button type="button" onClick={deleteBlog}>remove</button>}</div>
 			</div>  
 		</div>
 	)
