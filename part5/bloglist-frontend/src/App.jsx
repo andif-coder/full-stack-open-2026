@@ -65,6 +65,9 @@ const App = () => {
 			console.log('create new failed')
 		}
 	}
+	const updateLikes = async (updatedBlog) => {
+		setBlogs(blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b))
+	}
 	const loginForm = () => {
 		return (
 			<form onSubmit={handleLogin}>
@@ -96,11 +99,12 @@ const App = () => {
 				<CreateBlog handleCreate={handleCreate} />
 			</Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} updateLikes={updateLikes} />
       )}
 			</div>
 		)
 	}
+	console.log(blogs)
   return (
     <div>
 			{!user && loginForm()}
