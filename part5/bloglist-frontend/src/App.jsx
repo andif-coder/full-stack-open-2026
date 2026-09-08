@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -12,6 +13,7 @@ const App = () => {
 	const [title, setTitle] = useState('')
 	const [author, setAuthor] = useState('')
 	const [url, setUrl] = useState('')
+	const [msg, setMsg] = useState(null)
 
 	useEffect(() => {
 		const loggedUserJson = window.localStorage.getItem('loggedUser')
@@ -26,6 +28,12 @@ const App = () => {
       setBlogs( blogs )
     )  
   }, [])
+	const setNewMsg = ({ type, content }) => {
+		setMsg({ type: type, content: content })
+		setTimeout(() => {
+			setMsg(null)
+		}, 5000)
+	}
 	const handleLogin = async event => {
 		event.preventDefault()
 		try {
@@ -36,6 +44,7 @@ const App = () => {
 			setUsername('')
 			setPassword('')
 		} catch {
+			setNewMsg({ type: 'error', content: 'wrong username or password' })
 			console.log('wrong username or password')
 		}
 	}
@@ -54,7 +63,8 @@ const App = () => {
 			setTitle('')
 			setAuthor('')
 			setUrl('')
-			console.log(savedBlog)
+			setNewMsg({ type: 'success', content: `a new blog ${title} by ${author} added` })
+			console.log('cwj savedblog: ', savedBlog)
 		} catch {
 			console.log('create new failed')
 		}
@@ -63,6 +73,7 @@ const App = () => {
 		return (
 			<form onSubmit={handleLogin}>
 	    	<h2>log in to application</h2>
+				<Notification msg={msg} />
 				<div>
 					<label>
 						username: 
@@ -83,6 +94,7 @@ const App = () => {
 		return (
 			<div>
 			<h2>blogs</h2>
+			<Notification msg={msg} />
 			<p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
 			<form onSubmit={handleCreate}>
 				<h2>create new</h2>
