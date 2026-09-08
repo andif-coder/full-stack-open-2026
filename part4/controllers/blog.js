@@ -23,6 +23,7 @@ blogRouter.post('/', middleWare.userExtractor, async (request, response) => {
 		user: user._id
   })
   const savedBlog = await blog.save()
+	await savedBlog.populate('user', { username: 1, name: 1 })
 	user.blogs = (user.blogs || []).concat(savedBlog._id);
 	await user.save();
   response.status(201).json(savedBlog)
@@ -55,6 +56,7 @@ blogRouter.put('/:id', async (request, response) => {
 	}
 	blog.likes = body.likes;
 	const updatedBlog = await blog.save();
+	await updatedBlog.populate('user', { username: 1, name: 1 })
 	response.status(200).json(updatedBlog);
 })
 module.exports = blogRouter
