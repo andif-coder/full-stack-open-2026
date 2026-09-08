@@ -11,9 +11,6 @@ const App = () => {
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
 	const [user, setUser] = useState(null)
-	const [title, setTitle] = useState('')
-	const [author, setAuthor] = useState('')
-	const [url, setUrl] = useState('')
 	const [msg, setMsg] = useState(null)
 	const createBlogFormRef = useRef()
 
@@ -50,22 +47,18 @@ const App = () => {
 			console.log('wrong username or password')
 		}
 	}
-	const handleLogout = event => {
+	const handleLogout = _event => {
 		window.localStorage.removeItem('loggedUser')
 		blogService.setToken(null)
 		setUser(null)
 		setUsername('')
 		setPassword('')
 	}
-	const handleCreate = async event => {
-		event.preventDefault()
+	const handleCreate = async (data) => {
 		try {
-			const savedBlog = await blogService.create({ title, author, url })
+			const savedBlog = await blogService.create({ title: data.title, author: data.author, url: data.url })
 			setBlogs(blogs.concat(savedBlog))
-			setTitle('')
-			setAuthor('')
-			setUrl('')
-			setNewMsg({ type: 'success', content: `a new blog ${title} by ${author} added` })
+			setNewMsg({ type: 'success', content: `a new blog ${data.title} by ${data.author} added` })
 			createBlogFormRef.current.toggleVisibility()
 			console.log('cwj savedblog: ', savedBlog)
 		} catch {
@@ -100,15 +93,7 @@ const App = () => {
 			<Notification msg={msg} />
 			<p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
 			<Togglable buttonLabel="create new blog" ref={createBlogFormRef}>
-				<CreateBlog
-					handleCreate={handleCreate}
-					title={title}
-					setTitle={setTitle}
-					author={author}
-					setAuthor={setAuthor}
-					url={url}
-					setUrl={setUrl}
-				/>
+				<CreateBlog handleCreate={handleCreate} />
 			</Togglable>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
