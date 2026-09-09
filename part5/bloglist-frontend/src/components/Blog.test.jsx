@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 import { expect } from 'vitest'
@@ -40,5 +40,18 @@ describe('<Blog />', () => {
 		expect(showDiv).toHaveTextContent('www.abc.com')
 		expect(showDiv).toHaveTextContent('likes 90')
 		expect(showDiv).toBeVisible()
+	})
+	test('click like twice', async () => {
+		const updateLikes = vi.fn()
+		const { container } = render(<Blog blog={blog} updateLikes={updateLikes}/>)
+		const showDiv = container.querySelector('.blog-show')
+		const hiddenDiv = container.querySelector('.blog-hidden')
+		const user = userEvent.setup()
+		const buttonOfShow = hiddenDiv.querySelector('button')
+		await user.click(buttonOfShow)
+		const buttonOfLike = within(showDiv).getByRole('button', { name: /like/i })
+		await user.click(buttonOfLike)
+		await user.click(buttonOfLike)
+		expect(updateLikes.mock.calls).toHaveLength(2)
 	})
 })
