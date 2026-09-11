@@ -1,27 +1,28 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import { LoginForm, BlogForm } from './components/Form'
-import { Routes, Route, Link, useNavigate } from 'react-router-dom'
+import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom'
+import CreateBlog from './components/createBlog'
+import Notification from './components/Notification'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
-  const [msg, setMsg] = useState(null)
-  const createBlogFormRef = useRef()
-	const navigate = useNavigate()
-
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     const loggedUserJson = window.localStorage.getItem('loggedUser')
     if (loggedUserJson) {
       const userFromStorage = JSON.parse(loggedUserJson)
-      setUser(userFromStorage)
       blogService.setToken(userFromStorage.token)
+			return userFromStorage
     }
-  }, [])
+		return null
+	})
+  const [msg, setMsg] = useState(null)
+	const navigate = useNavigate()
+
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
@@ -61,7 +62,7 @@ const App = () => {
       const savedBlog = await blogService.create({ title: data.title, author: data.author, url: data.url })
       setBlogs(blogs.concat(savedBlog))
       setNewMsg({ type: 'success', content: `a new blog ${data.title} by ${data.author} added` })
-      createBlogFormRef.current.toggleVisibility()
+			navigate('/')
       console.log('cwj savedblog: ', savedBlog)
     } catch {
       console.log('create new failed')
@@ -74,20 +75,27 @@ const App = () => {
   const removeBlog = async (removeBlog) => {
     await blogService.remove(removeBlog)
     setBlogs(blogs.filter(b => b.id !== removeBlog.id))
+		navigate('/')
   }
   return (
     <div>
 			<div>
 				<Link to="/">blogs</Link>
+				{user ?
+					<Link to="/create">new blog</Link> :
+					null
+				}
 				{user ? 
 					<button onClick={handleLogout}>logout</button> :
 					<Link to="/login">login</Link>
 				}
 			</div>
+      <Notification msg={msg} />
 			<Routes>
-				<Route path="/" element={<BlogForm msg={msg} user={user} createBlogFormRef={createBlogFormRef} handleCreate={handleCreate} blogs={blogs}/>} />
+				<Route path="/" element={<BlogForm msg={msg} user={user} blogs={blogs}/>} />
 				<Route path="/login" element={<LoginForm handleLogin={handleLogin} msg={msg} setUsername={setUsername} username={username} setPassword={setPassword} password={password}/>} />
 				<Route path="/blogs/:id" element={<Blog blogs={blogs} updateLikes={updateLikes} removeBlog={removeBlog} user={user}/>} />
+				<Route path="/create" element={user ? <CreateBlog handleCreate={handleCreate} /> : <Navigate replace to="/login" />} />
 			</Routes>
     </div>
   )
