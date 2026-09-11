@@ -1,21 +1,9 @@
-import { useState } from 'react'
-const Blog = ({ blog, updateLikes, removeBlog, user }) => {
-  const [isShow, setIsShow] = useState(false)
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5
-  }
-  const noneStyle = { display: 'none' }
-  const showStyle = isShow ? blogStyle : noneStyle
-  const hiddenStyle = !isShow ? blogStyle : noneStyle
-  // console.log('cwj username: ', user.username, ' blog.user.username: ', blog.user.username)
+import { useParams } from 'react-router-dom'
+const Blog = ({ blogs, updateLikes, removeBlog, user }) => {
+	const id = useParams().id
+	const blog = blogs.find(b => b.id === id)
+	if (!blog) return null
   const showRemove = user?.username === blog.user?.username
-  const handleShow = () => {
-    setIsShow(!isShow)
-  }
   const addlikes = async () => {
     const updateBlog = {
       ...blog,
@@ -30,16 +18,11 @@ const Blog = ({ blog, updateLikes, removeBlog, user }) => {
   }
   return (
     <div>
-      <div style={hiddenStyle} className='blog-hidden'>
-        {blog.title} {blog.author} <button type="button" onClick={handleShow}> {isShow ? 'hide' : 'view' }</button>
-      </div>
-      <div style={showStyle} className='blog-show'>
-        <div>{blog.title} {blog.author} <button type="button" onClick={handleShow}> {isShow ? 'hide' : 'view' }</button></div>
-        <div>{blog.url}</div>
-        <div>likes {blog.likes} <button type="button" onClick={addlikes}>like</button></div>
-        <div>{blog.user?.name}</div>
-        <div>{showRemove && <button type="button" onClick={deleteBlog}>remove</button>}</div>
-      </div>
+      <div><h2>{blog.author}: {blog.title}</h2></div>
+      <div><a>{blog.url}</a></div>
+      <div>likes {blog.likes} {user?<button type="button" onClick={addlikes}>like</button>:null}</div>
+      <div>Added by {blog.user?.name}</div>
+      <div>{showRemove && <button type="button" onClick={deleteBlog}>remove</button>}</div>
     </div>
   )
 }

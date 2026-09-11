@@ -1,5 +1,5 @@
 import Notification from './Notification'
-import Blog from './Blog'
+import { Link } from 'react-router-dom'
 import Togglable from './toggle'
 import CreateBlog from './createBlog'
 export const LoginForm = ({ handleLogin, msg, setUsername, username, setPassword, password }) => {
@@ -23,7 +23,7 @@ export const LoginForm = ({ handleLogin, msg, setUsername, username, setPassword
     </form>
   )
 }
-export const BlogForm = ({ msg, user, createBlogFormRef, handleCreate, blogs, updateLikes, removeBlog }) => {
+export const BlogForm = ({ msg, user, createBlogFormRef, handleCreate, blogs}) => {
   return (
     <div>
       <h2>blogs</h2>
@@ -32,9 +32,13 @@ export const BlogForm = ({ msg, user, createBlogFormRef, handleCreate, blogs, up
       <Togglable buttonLabel="create new blog" ref={createBlogFormRef}>
         <CreateBlog handleCreate={handleCreate} />
       </Togglable>
-      {[...blogs].sort((a, b) => { return b.likes - a.likes }).map(blog =>
-        <Blog key={blog.id} blog={blog} updateLikes={updateLikes} removeBlog={removeBlog} user={user}/>
-      )}
+      <ul>
+				{[...blogs].sort((a, b) => { return b.likes - a.likes }).map(blog =>
+					<li key={blog.id}>
+						<Link to={`/blogs/${blog.id}`}>{blog.title} by {blog.author}</Link>
+					</li>
+				)}
+			</ul>
     </div>
   )
 }

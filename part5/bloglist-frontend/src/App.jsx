@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import { LoginForm, BlogForm } from './components/Form'
@@ -84,8 +85,9 @@ const App = () => {
 				}
 			</div>
 			<Routes>
-				<Route path="/" element={<BlogForm msg={msg} user={user} createBlogFormRef={createBlogFormRef} handleCreate={handleCreate} blogs={blogs} updateLikes={updateLikes} removeBlog={removeBlog}/>} />
+				<Route path="/" element={<BlogForm msg={msg} user={user} createBlogFormRef={createBlogFormRef} handleCreate={handleCreate} blogs={blogs}/>} />
 				<Route path="/login" element={<LoginForm handleLogin={handleLogin} msg={msg} setUsername={setUsername} username={username} setPassword={setPassword} password={password}/>} />
+				<Route path="/blogs/:id" element={<Blog blogs={blogs} updateLikes={updateLikes} removeBlog={removeBlog} user={user}/>} />
 			</Routes>
     </div>
   )
