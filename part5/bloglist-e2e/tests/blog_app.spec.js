@@ -1,5 +1,4 @@
 import { test, describe, expect, beforeEach } from '@playwright/test'
-import { log } from 'console'
 
 describe('Blog app', () => {
 	beforeEach(async ({ page, request }) => {
@@ -43,7 +42,7 @@ describe('Blog app', () => {
 		await page.getByLabel('author:').fill(author)
 		await page.getByLabel('url:').fill(url)
 		await page.getByRole('button', { name: 'create' }).click()
-		await expect(page.getByRole('link', { hasText: title })).toBeVisible()
+		await expect(page.getByRole('link', { name: title })).toBeVisible()
 	}
 	describe('When logged in', () => {
 		beforeEach(async ({ page }) => {
@@ -65,36 +64,26 @@ describe('Blog app', () => {
 				}
 				await createBlog(page, blog.title, blog.author, blog.url)
 			})
-			test('The Blog\'s creator', async () => {
+			test('a new blog can be created', async ({ page }) => {
 				await page.getByRole('link', { name: `${blog.title} by ${blog.author}` }).click()
-				await expect(page.getByRole('heading', { level: 2, name: `${blog.title}: ${blog.author}` })).toBeVisible()
+				await expect(page.getByRole('heading', { level: 2, name: `${blog.author}: ${blog.title}` })).toBeVisible()
 			})
-			// test('a new blog can be created', async ({ page }) => {
-			// 	await expect(page.getByText('a new blog title for testing by andwho added')).toBeVisible()
-			// 	const blogDiv = page.locator('.blog-hidden')
-			// 	await expect(blogDiv).toContainText('title for testing andwho')
-			// 	await expect(blogDiv.getByRole('button', { name: 'view' })).toBeVisible()
-			// })
-			// test('add like', async ({ page }) => {
-			// 	const blogDiv = page.locator('.blog-hidden')
-			// 	const viewButton = blogDiv.getByRole('button', { name: 'view' })
-			// 	await viewButton.click()
-			// 	const likesDiv = page.getByText('likes 0')
-			// 	const likeButton = likesDiv.getByRole('button', { name: 'like' })
-			// 	await likeButton.click()
-			// 	await expect(page.getByText('likes 1')).toBeVisible()
-			// })
-			// test('delete blog', async ({ page }) => {
-			// 	const blogDiv = page.locator('.blog-hidden')
-			// 	const viewButton = blogDiv.getByRole('button', { name: 'view' })
-			// 	await viewButton.click()
-			// 	const removeButton = page.getByRole('button', { name: 'remove' })
-			// 	page.once('dialog', async dialog => {
-			// 		await dialog.accept()
-			// 	})
-			// 	await removeButton.click()
-			// 	await expect(page.getByText('title for testing andwho')).toHaveCount(0)
-			// })
+			test('add like', async ({ page }) => {
+				await page.getByRole('link', { name: `${blog.title} by ${blog.author}` }).click()
+				const likesDiv = page.getByText('likes 0')
+				const likeButton = likesDiv.getByRole('button', { name: 'like' })
+				await likeButton.click()
+				await expect(page.getByText('likes 1')).toBeVisible()
+			})
+			test('delete blog', async ({ page }) => {
+				await page.getByRole('link', { name: `${blog.title} by ${blog.author}` }).click()
+				const removeButton = page.getByRole('button', { name: 'remove' })
+				page.once('dialog', async dialog => {
+					await dialog.accept()
+				})
+				await removeButton.click()
+				await expect(page.getByRole('link', { name: `${blog.title} by ${blog.author}` })).not.toBeVisible()
+			})
 			// test('remove button visibility', async ({ page, request }) => {
 			// 	await request.post('http://localhost:3003/api/users', {
 			// 		data: {
