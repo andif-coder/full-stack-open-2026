@@ -6,6 +6,7 @@ import { LoginForm, BlogForm } from './components/Form'
 import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom'
 import CreateBlog from './components/createBlog'
 import Notification from './components/Notification'
+import { Button, AppBar, Toolbar, Typography, Box } from '@mui/material'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -79,17 +80,20 @@ const App = () => {
   }
   return (
     <div>
-			<div>
-				<Link to="/">blogs</Link>
-				{user ?
-					<Link to="/create">new blog</Link> :
-					null
-				}
-				{user ? 
-					<button onClick={handleLogout}>logout</button> :
-					<Link to="/login">login</Link>
-				}
-			</div>
+			<AppBar position="static">
+				<Toolbar>
+					<Typography variant="h6" component="div">Blog APP</Typography>
+					<Box sx = {{ flexGrow: 1 }} />
+					<Button color="inherit" component={Link} to="/">BLOGS</Button>
+					{ user ? 
+						<Button color="inherit" component={Link} to="/create">NEW BLOG</Button> : null
+					}
+					{ user ?
+						<Button color="inherit" onClick={handleLogout}>LOGOUT</Button> : 
+						<Button color="inherit" component={Link} to="/login">LOGIN</Button>
+					}
+				</Toolbar>
+			</AppBar>
       <Notification msg={msg} />
 			<Routes>
 				<Route path="/" element={<BlogForm msg={msg} user={user} blogs={blogs}/>} />
